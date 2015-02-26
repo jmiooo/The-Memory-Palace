@@ -7,6 +7,8 @@
     <uses-sdk
         android:minSdkVersion="12"
         android:targetSdkVersion="21" />
+    
+    <uses-permission android:name="android.permission.ACTION_USER_PRESENT" />
 
     <application
         android:allowBackup="true"
@@ -30,6 +32,11 @@
             android:name=".SetupActivity"
             android:label="@string/title_activity_setup" >
         </activity>
+        <receiver android:name=".UserPresentBroadcastReceiver">
+ 			<intent-filter>
+			    <action android:name="android.intent.action.USER_PRESENT" />
+			</intent-filter>
+		</receiver>
     </application>
 
 </manifest>

@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -58,6 +59,9 @@ public class MainActivity extends Activity {
 			setContentView(R.layout.activity_main_entry);
 			editText = (EditText) findViewById(R.id.enter_path_name);
 		}
+		else if (task.equals(SetupActivity.AUTHENTICATE)) {
+			setContentView(R.layout.activity_main_authenticate);
+		}
 		memoryView = (MemoryView) findViewById(R.id.memory);
 		memoryView.setMode(mode);
 		memoryView.setTask(task);
@@ -73,7 +77,7 @@ public class MainActivity extends Activity {
 		editor = sharedPreferences.edit();
 		gson = new Gson();
 		
-		if (task.equals(SetupActivity.MATCH)) {
+		if (task.equals(SetupActivity.MATCH) || task.equals(SetupActivity.AUTHENTICATE)) {
 			String pathName = intent.getStringExtra(SetupActivity.PATHNAME);
 			memoryView.setRoomManager(sharedPreferences.getString(pathName, ""));
 		}
@@ -109,7 +113,11 @@ public class MainActivity extends Activity {
     //}
 	
 	public void matchPath(View view) {
-		memoryView.matchPath();
+		boolean result = memoryView.matchPath();
+		
+		 if (result && task.equals(SetupActivity.AUTHENTICATE)) {
+			exit(view);
+		}
 	}
 	
 	public void enterPath(View view) {
@@ -135,6 +143,11 @@ public class MainActivity extends Activity {
 	
 	public void resetPath(View view) {
 		memoryView.resetPath();
+	}
+	
+	public void exit(View view) {
+		android.os.Process.killProcess(android.os.Process.myPid());
+		super.onDestroy();
 	}
 	
 	public boolean onTouchEvent(MotionEvent event) {
@@ -220,4 +233,22 @@ public class MainActivity extends Activity {
 
         return super.onTouchEvent(event);
     }
+	
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+	    if (task.equals(SetupActivity.AUTHENTICATE)) {
+			return true;
+		}
+	    
+	    return super.onKeyDown(keyCode, event);
+	}
+
+	@Override
+	public boolean onKeyUp(int keyCode, KeyEvent event) {
+		if (task.equals(SetupActivity.AUTHENTICATE)) {
+			return true;
+		}
+		
+	    return super.onKeyUp(keyCode, event);
+	}
 }

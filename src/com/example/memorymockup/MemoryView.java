@@ -332,6 +332,10 @@ public class MemoryView extends View {
 			return this.doors;
 		}
 		
+		public List<Item> getItems() {
+			return this.items;
+		}
+		
 		public int[][] getOccupiedSquares() {
 			if (null == this.occupiedSquares) {
 				this.occupiedSquares = 
@@ -343,7 +347,7 @@ public class MemoryView extends View {
 	}
 	
 	/* Key and RoomGrid are only used for non-impossible spaces */
-	public static class Key {
+	/*public static class Key {
 	    private final int x;
 	    private final int y;
 
@@ -368,10 +372,10 @@ public class MemoryView extends View {
 	        result = 31 * result + y;
 	        return result;
 	    }
-	}
+	}*/
 	
 	// Grid-view of rooms
-	public static class RoomGrid {
+	/*public static class RoomGrid {
 		private HashMap<Key, Integer> roomGrid;
 		
 		public RoomGrid() {
@@ -406,7 +410,7 @@ public class MemoryView extends View {
 			
 			return result;
 		}
-	}
+	}*/
 	
 	/* Main room manager class */
 	private class RoomManager {
@@ -952,7 +956,7 @@ public class MemoryView extends View {
 		this.roomManager.setLastDoorIndex(-1);
 	}
 	
-	public void matchPath() {
+	public boolean matchPath() {
 		List<Integer> pathUntilNow = roomManager.getPath();
 		
 		if (pathUntilNow.size() == pathToFollow.size()) {
@@ -960,17 +964,18 @@ public class MemoryView extends View {
 				if (pathUntilNow.get(i) != pathToFollow.get(i)) {
 					status = "Path is incorrect.";
 					invalidate();
-					return;
+					return false;
 				}
 			}
 			
 			status = "Path is correct.";
 			invalidate();
-			return;
+			return true;
 		}
 		
 		status = "Path is incorrect.";
 		invalidate();
+		return false;
 	}
 	
 	public String getRoomInfoStringified() {

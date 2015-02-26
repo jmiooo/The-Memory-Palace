@@ -12,7 +12,9 @@
     <string name="match">Match Path</string>
     <string name="entry">Enter Path</string>
     <string name="delete">Delete Path</string>
+    <string name="select">Select Path</string>
     <string name="reset">Reset Path</string>
     <string name="enter_path_hint">Enter the name of the path.</string>
+    <string name="exit">Exit</string>
 
 </resources>

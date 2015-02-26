@@ -10,8 +10,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -24,10 +24,15 @@ public class SetupActivity extends Activity {
 	public static String TASK = "task";
 	public static String MATCH = "match";
 	public static String ENTRY = "entry";
+	public static String AUTHENTICATE = "authenticate";
+	
 	public static String PATHNAME = "path-name";
+	public static String AUTHENTICATORNAME = "authenticator-name";
+	public static String AUTHENTICATORMODE = "authenticator-mode";
 	
 	public static String IMPOSSIBLEFILE = "impossible_paths";
 	public static String NONIMPOSSIBLEFILE = "nonimpossible_paths";
+	public static String AUTHENTICATORFILE = "authenticator_paths";
 	
 	public static String PATHLIST = "path_list";
 	
@@ -38,6 +43,8 @@ public class SetupActivity extends Activity {
 	
 	public SharedPreferences sharedPreferences;
 	public Editor editor;
+	public SharedPreferences authenticatorSharedPreferences;
+	public Editor authenticatorEditor;
 	public Gson gson;
 	
 	public int pathIndex;
@@ -84,6 +91,8 @@ public class SetupActivity extends Activity {
 
 		sharedPreferences = this.getSharedPreferences(fileName, Context.MODE_PRIVATE);
 		editor = sharedPreferences.edit();
+		authenticatorSharedPreferences = this.getSharedPreferences(AUTHENTICATORFILE, Context.MODE_PRIVATE);
+		authenticatorEditor = authenticatorSharedPreferences.edit();
 		gson = new Gson();
 		
 		List<String> pathList = new ArrayList<String>();
@@ -144,6 +153,16 @@ public class SetupActivity extends Activity {
 			editor.remove(pathName);
 			editor.commit();
 			onStart();
+		}
+	}
+	
+	// Select to be the authenticator path
+	public void selectPath(View view) {
+		if (pathIndex >= 0) {
+			String pathName = listAdapter.getDataAtPosition(pathIndex);
+			authenticatorEditor.putString(AUTHENTICATORNAME, pathName);
+			authenticatorEditor.putString(AUTHENTICATORMODE, mode);
+			authenticatorEditor.commit();
 		}
 	}
 }
