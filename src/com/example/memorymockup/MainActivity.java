@@ -113,36 +113,42 @@ public class MainActivity extends Activity {
     //}
 	
 	public void matchPath(View view) {
-		boolean result = memoryView.matchPath();
-		
-		 if (result && task.equals(SetupActivity.AUTHENTICATE)) {
-			exit(view);
+		if (!inTransition) {
+			boolean result = memoryView.matchPath();
+			
+			 if (result && task.equals(SetupActivity.AUTHENTICATE)) {
+				exit(view);
+			}
 		}
 	}
 	
 	public void enterPath(View view) {
-		String pathName = editText.getText().toString();
-		
-		if (!pathName.equals("")) {
-			String roomInfo = memoryView.getRoomInfoStringified();
-			System.out.println(roomInfo);
-			editor.putString(pathName, roomInfo);
+		if (!inTransition) {
+			String pathName = editText.getText().toString();
 			
-			List<String> pathList = new ArrayList<String>();
-			if (sharedPreferences.contains(SetupActivity.PATHLIST)) {
-				String json = sharedPreferences.getString(SetupActivity.PATHLIST, "");
-				Type type = new TypeToken<List<String>>(){}.getType();
-				pathList = gson.fromJson(json, type);
+			if (!pathName.equals("")) {
+				String roomInfo = memoryView.getRoomInfoStringified();
+				System.out.println(roomInfo);
+				editor.putString(pathName, roomInfo);
+				
+				List<String> pathList = new ArrayList<String>();
+				if (sharedPreferences.contains(SetupActivity.PATHLIST)) {
+					String json = sharedPreferences.getString(SetupActivity.PATHLIST, "");
+					Type type = new TypeToken<List<String>>(){}.getType();
+					pathList = gson.fromJson(json, type);
+				}
+				pathList.add(pathName);
+				editor.putString(SetupActivity.PATHLIST, gson.toJson(pathList));
+				editor.commit();
+				this.finish();
 			}
-			pathList.add(pathName);
-			editor.putString(SetupActivity.PATHLIST, gson.toJson(pathList));
-			editor.commit();
-			this.finish();
 		}
 	}
 	
 	public void resetPath(View view) {
-		memoryView.resetPath();
+		if (!inTransition) {
+			memoryView.resetPath();
+		}
 	}
 	
 	public void exit(View view) {

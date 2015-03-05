@@ -16,7 +16,7 @@ public class UserPresentBroadcastReceiver extends BroadcastReceiver {
          * device wakes up (e.g when the keyguard is gone)
          * */
  
-        if(false && intent.getAction().equals(Intent.ACTION_USER_PRESENT)){
+        if(intent.getAction().equals(Intent.ACTION_USER_PRESENT)){
         	sharedPreferences = context.getSharedPreferences(SetupActivity.AUTHENTICATORFILE, Context.MODE_PRIVATE);
         	String authenticatorName = sharedPreferences.getString(SetupActivity.AUTHENTICATORNAME, "");
         	String authenticatorMode = sharedPreferences.getString(SetupActivity.AUTHENTICATORMODE, "");

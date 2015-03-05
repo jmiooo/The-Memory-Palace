@@ -21,21 +21,21 @@
     <Button
 	     android:layout_height="wrap_content"
 	     android:layout_width="300dp"
-	     android:layout_marginBottom="20dp"
+	     android:layout_marginBottom="5dp"
 	     android:text="@string/match"
 	     android:onClick="matchPath" />
     
     <Button
 	     android:layout_height="wrap_content"
 	     android:layout_width="300dp"
-	     android:layout_marginBottom="20dp"
+	     android:layout_marginBottom="5dp"
 	     android:text="@string/reset"
 	     android:onClick="resetPath" />
     
     <Button
 	     android:layout_height="wrap_content"
 	     android:layout_width="300dp"
-	     android:layout_marginBottom="20dp"
+	     android:layout_marginBottom="5dp"
 	     android:text="@string/exit"
 	     android:onClick="exit" />
 
