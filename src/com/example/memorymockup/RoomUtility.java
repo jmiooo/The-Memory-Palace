@@ -14,9 +14,12 @@ public class RoomUtility {
 	 * 4: 4 block L, 5: 5 block L,
 	 * 6: 5 block thumb */
 	public static final int[] COLORS =
-		{Color.RED, 0xFFF2D387, Color.GREEN, Color.BLUE, Color.GRAY};
+		{0xFFEEEEEE, 0xFFF2D387, Color.LTGRAY};
 	
-	public static final int THREE_LINE = 0;
+	public static final int[] TYPES =
+		{0, 1, 2, 3, 4, 5, 6};
+	
+	/*public static final int THREE_LINE = 0;
 	public static final int FOUR_LINE = 1;
 	public static final int FOUR_SQUARE = 2;
 	public static final int NINE_SQUARE = 3;
@@ -31,10 +34,10 @@ public class RoomUtility {
 	public static final int ONE_EIGHTY_DEG = 2;
 	public static final int TWO_SEVENTY_DEG = 3;
 	public static final int[] ROTATIONS =
-		{ZERO_DEG, NINETY_DEG, ONE_EIGHTY_DEG, TWO_SEVENTY_DEG};
+		{ZERO_DEG, NINETY_DEG, ONE_EIGHTY_DEG, TWO_SEVENTY_DEG};*/
 	
 	/* A bunch of room utility functions, used for both impossible and non-impossible spaces */
-	public static void rotateSquares(int[][] squares, int rotation) {
+	/*public static void rotateSquares(int[][] squares, int rotation) {
 		switch (rotation) {
 			case ZERO_DEG:
 				break;
@@ -129,11 +132,11 @@ public class RoomUtility {
 		}
 		
 		return squares;
-	}
+	}*/
 	
 	/* The placement of doors are limited as of now, but can be expanded later */
-	public static List<Door> getDoors(int x, int y, int type, int rotation) {
-		int[][] squares = new int[0][0];
+	public static List<Door> getDoors(int x, int y) {
+		/*int[][] squares = new int[0][0];
 		int[] directions = new int[0];
 		
 		switch (type) {
@@ -194,13 +197,12 @@ public class RoomUtility {
 		for (int i = 0; i < squares.length; i++) {
 			squares[i][0] += x;
 			squares[i][1] += y;
-		}
+		}*/
 		
 		List<Door> result = new ArrayList<Door>();
 		
-		for (int i = 0; i < squares.length; i++) {
-			result.add(new Door(squares[i][0], squares[i][1], 
-								directions[i], -1, -1));
+		for (int i = 0; i < 4; i++) {
+			result.add(new Door(0, 0, i, -1, -1));
 		}
 		
 		return result;
@@ -275,24 +277,24 @@ public class RoomUtility {
 		private int number;
 		private int x, y;
 		private int type;
-		private int rotation;
+		//private int rotation;
 		private int colorIndex;
 		private int color;
 		private List<Door> doors;
 		private List<Item> items;
-		private int[][] occupiedSquares;
+		//private int[][] occupiedSquares;
 		
-		public Room(int number, int x, int y, int type, int rotation, int colorIndex, int color) {
+		public Room(int number, int x, int y, int type, int colorIndex, int color) {
 			this.number = number;
 			this.x = x;
 			this.y = y;
 			this.type = type;
-			this.rotation = rotation;
+			//this.rotation = rotation;
 			this.colorIndex = colorIndex;
 			this.color = color;
-			this.doors = RoomUtility.getDoors(x, y, type, rotation);
+			this.doors = RoomUtility.getDoors(x, y);
 			this.items = new ArrayList<Item>();
-			this.occupiedSquares = null;
+			//this.occupiedSquares = null;
 		}
 		
 		public int getNumber() {
@@ -301,6 +303,10 @@ public class RoomUtility {
 		
 		public int[] getPosition() {
 			return new int[] {x, y};
+		}
+		
+		public int getType() {
+			return this.type;
 		}
 		
 		public int getColorIndex() {
@@ -319,14 +325,14 @@ public class RoomUtility {
 			return this.items;
 		}
 		
-		public int[][] getOccupiedSquares() {
+		/*public int[][] getOccupiedSquares() {
 			if (null == this.occupiedSquares) {
 				this.occupiedSquares = 
 					RoomUtility.getOccupiedSquares(this.x, this.y, this.type, this.rotation);
 			}
 			
 			return this.occupiedSquares;
-		}
+		}*/
 	}
 
 	/* Main room manager class */
@@ -335,6 +341,9 @@ public class RoomUtility {
 		protected List<Room> rooms;
 		protected List<Integer> path; /* List of room numbers */
 		protected int lastDoorIndex;
+		protected boolean preProcessed = false;
+		protected int nextType;
+		protected int nextColorIndex;
 		
 		protected Random randomGenerator;
 		
@@ -344,7 +353,7 @@ public class RoomUtility {
 			
 			randomGenerator = new Random();
 			int type = randomGenerator.nextInt(TYPES.length);
-			int rotation = 0;
+			//int rotation = 0;
 			/*switch (type) {
 				case THREE_LINE:
 					rotation = randomGenerator.nextInt(2);
@@ -364,7 +373,7 @@ public class RoomUtility {
 			}*/
 			int colorIndex = randomGenerator.nextInt(COLORS.length);
 			int color = COLORS[colorIndex];
-			currentRoom = new Room(0, 0, 0, type, rotation, colorIndex, color);
+			currentRoom = new Room(0, 0, 0, type, colorIndex, color);
 			
 			rooms.add(currentRoom);
 			path.add(0);
@@ -404,7 +413,21 @@ public class RoomUtility {
 			this.lastDoorIndex = lastDoorIndex;
 		}
 		
+		public int getNextType() {
+			return this.nextType;
+		}
+		
+		public int getNextColorIndex() {
+			return this.nextColorIndex;
+		}
+		
 		public void processMove(int i) {
+		}
+		
+		public void preProcessMove(int i) {
+			preProcessed = true;
+			nextType = randomGenerator.nextInt(TYPES.length);
+			nextColorIndex = randomGenerator.nextInt(COLORS.length);
 		}
 	}
 	
@@ -425,28 +448,36 @@ public class RoomUtility {
 			}
 			else {
 				int number = rooms.size();
-				int type = randomGenerator.nextInt(TYPES.length);
-				int rotation = 0;
-				/*switch (type) {
-					case THREE_LINE:
-						rotation = randomGenerator.nextInt(2);
-						break;
-					case FOUR_SQUARE:
-					case NINE_SQUARE:
-						rotation = 0;
-						break;
-					case FOUR_LINE:
-					case FOUR_EL:
-					case FIVE_EL:
-					case FIVE_THUMB:
-						rotation = randomGenerator.nextInt(ROTATIONS.length);
-						break;
-					default:
-						break;
-				}*/
-				int colorIndex = randomGenerator.nextInt(COLORS.length);
+				int type, colorIndex;
+				if (preProcessed) {
+					preProcessed = false;
+					type = nextType;
+					colorIndex = nextColorIndex;
+				}
+				else {
+					type = randomGenerator.nextInt(TYPES.length);
+					/*int rotation = 0;
+					switch (type) {
+						case THREE_LINE:
+							rotation = randomGenerator.nextInt(2);
+							break;
+						case FOUR_SQUARE:
+						case NINE_SQUARE:
+							rotation = 0;
+							break;
+						case FOUR_LINE:
+						case FOUR_EL:
+						case FIVE_EL:
+						case FIVE_THUMB:
+							rotation = randomGenerator.nextInt(ROTATIONS.length);
+							break;
+						default:
+							break;
+					}*/
+					colorIndex = randomGenerator.nextInt(COLORS.length);
+				}
 				int color = COLORS[colorIndex];
-				Room newRoom = new Room(number, 0, 0, type, rotation, colorIndex, color);				
+				Room newRoom = new Room(number, 0, 0, type, colorIndex, color);				
 				List<Door> newDoors = newRoom.getDoors();
 				List<Integer> possibleDoorIndices = new ArrayList<Integer> ();
 				for (int i = 0; i < newDoors.size(); i++) {
@@ -510,28 +541,36 @@ public class RoomUtility {
 			}
 			else {
 				int number = rooms.size();
-				int type = randomGenerator.nextInt(TYPES.length);
-				int rotation = 0;
-				/*switch (type) {
-					case THREE_LINE:
-						rotation = randomGenerator.nextInt(2);
-						break;
-					case FOUR_SQUARE:
-					case NINE_SQUARE:
-						rotation = 0;
-						break;
-					case FOUR_LINE:
-					case FOUR_EL:
-					case FIVE_EL:
-					case FIVE_THUMB:
-						rotation = randomGenerator.nextInt(ROTATIONS.length);
-						break;
-					default:
-						break;
-				}*/
-				int colorIndex = randomGenerator.nextInt(COLORS.length);
+				int type, colorIndex;
+				if (preProcessed) {
+					preProcessed = false;
+					type = nextType;
+					colorIndex = nextColorIndex;
+				}
+				else {
+					type = randomGenerator.nextInt(TYPES.length);
+					/*int rotation = 0;
+					switch (type) {
+						case THREE_LINE:
+							rotation = randomGenerator.nextInt(2);
+							break;
+						case FOUR_SQUARE:
+						case NINE_SQUARE:
+							rotation = 0;
+							break;
+						case FOUR_LINE:
+						case FOUR_EL:
+						case FIVE_EL:
+						case FIVE_THUMB:
+							rotation = randomGenerator.nextInt(ROTATIONS.length);
+							break;
+						default:
+							break;
+					}*/
+					colorIndex = randomGenerator.nextInt(COLORS.length);
+				}
 				int color = COLORS[colorIndex];
-				Room newRoom = new Room(number, 0, 0, type, rotation, colorIndex, color);				
+				Room newRoom = new Room(number, 0, 0, type, colorIndex, color);				
 				List<Door> newDoors = newRoom.getDoors();
 				List<Integer> possibleDoorIndices = new ArrayList<Integer> ();
 				for (int i = 0; i < newDoors.size(); i++) {
@@ -556,7 +595,7 @@ public class RoomUtility {
 		}
 	}
 	
-	public static class SemiEquilateralTriangle extends Path {
+	/*public static class SemiEquilateralTriangle extends Path {
 		
 		public SemiEquilateralTriangle() {
 			super();
@@ -588,5 +627,5 @@ public class RoomUtility {
 					break;
 			}
 		}
-	}
+	}*/
 }

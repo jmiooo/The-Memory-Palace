@@ -15,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
@@ -63,6 +64,20 @@ public class MainActivity extends Activity {
 			setContentView(R.layout.activity_main_authenticate);
 		}
 		memoryView = (MemoryView) findViewById(R.id.memory);
+		if (memoryView.getViewTreeObserver().isAlive()) {
+		    memoryView.getViewTreeObserver().addOnGlobalLayoutListener( 
+		    	    new OnGlobalLayoutListener(){
+		    	        @Override
+		    	        public void onGlobalLayout() {
+		    	            // gets called after layout has been done
+		    	        	if (memoryView.getViewTreeObserver().isAlive()) {
+		    	        		memoryView.getViewTreeObserver().removeOnGlobalLayoutListener( this );
+		    	        	}
+		    	            memoryView.initDrawables();
+		    	        }
+		    	});
+		}
+		 
 		memoryView.setMode(mode);
 		memoryView.setTask(task);
 		
@@ -157,6 +172,7 @@ public class MainActivity extends Activity {
 	}
 	
 	public boolean onTouchEvent(MotionEvent event) {
+		// Method to get motion with swipes instead of presses
 		/*if (!inTransition) {
 			int x = (int)event.getX();
 		    int y = (int)event.getY();

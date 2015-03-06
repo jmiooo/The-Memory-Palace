@@ -9,6 +9,7 @@
     <FrameLayout android:orientation="vertical"
         android:layout_width="fill_parent" 
         android:layout_height="0dip" 
+        android:fillViewport="true"
         android:id="@+id/memoryFrame" 
         android:layout_weight="1.0">
 	    <com.example.memorymockup.MemoryView

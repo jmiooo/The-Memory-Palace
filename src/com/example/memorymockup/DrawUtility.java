@@ -6,10 +6,9 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.Log;
+import android.view.View;
 
 public class DrawUtility {
-	public static final int[] COLORS =
-		{Color.RED, Color.YELLOW, Color.GREEN, Color.BLUE, Color.GRAY};
 	
 	public static class Sprite {
 		public double[] position = {0.0, 0.0};
@@ -45,6 +44,29 @@ public class DrawUtility {
 		
 		public void setColor(int color) {
 			this.color = color;
+		}
+		
+		// Translate the width or height of the screen in a direction
+		public void directionTranslate(int direction, int width, int height) {
+			//int width = view.getWidth();
+			//int height = view.getHeight();
+			
+			switch (direction) {
+				case 0:
+					position = new double[] {position[0] - width, position[1]};
+					break;
+				case 1:
+					position = new double[] {position[0], position[1] - (height - 200)};
+					break;
+				case 2:
+					position = new double[] {position[0] + width, position[1]};
+					break;
+				case 3:
+					position = new double[] {position[0], position[1] + (height - 200)};
+					break;
+				default:
+					break;
+			}
 		}
 	}
 	
