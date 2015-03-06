@@ -46,10 +46,8 @@ public class DrawUtility {
 			this.color = color;
 		}
 		
-		// Translate the width or height of the screen in a direction
+		// Translate by the width or height in a direction
 		public void directionTranslate(int direction, int width, int height) {
-			//int width = view.getWidth();
-			//int height = view.getHeight();
 			
 			switch (direction) {
 				case 0:

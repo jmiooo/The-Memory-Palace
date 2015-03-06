@@ -265,10 +265,6 @@ public class MemoryView extends View {
 		}
 		
 		for (int i = 0; i < doorSprites.length; i++) {
-			/*if (i == roomManager.lastDoorIndex)
-				doorSprites[i].draw(canvas, doorPaintLast);
-			else
-				doorSprites[i].draw(canvas, roomPaints[roomManager.getCurrentRoom().getColorIndex()]);*/
 		}
 		
 		playerSprite.draw(canvas);
