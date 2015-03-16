@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
+import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,6 +19,10 @@ import android.view.View;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.HorizontalScrollView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.ViewFlipper;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -28,17 +33,27 @@ public class MainActivity extends Activity {
 	public static final int RIGHT = 2;
 	public static final int DOWN = 3;
 	
+	public static final int SWIPELENGTH = 200;
+	
 	//public static String SAVE_KEY = "memory-view";
 	
 	public Intent intent;
 	public String mode;
 	public String task;
+	public String pathName;
+	public String inputMethod;
 	
 	public MemoryView memoryView;
+	public ViewFlipper minimapViewFlipper;
+	public HorizontalScrollView minimapScroll;
+	public LinearLayout minimap;
+	public TextView statusText;
 	public EditText editText;
 	
 	public SharedPreferences sharedPreferences;
 	public Editor editor;
+	public SharedPreferences authenticatorSharedPreferences;
+	public Editor authenticatorEditor;
 	public Gson gson;
 	
 	public boolean inTransition;
@@ -52,6 +67,8 @@ public class MainActivity extends Activity {
 		intent = getIntent();
 		mode = intent.getStringExtra(StartActivity.MODE);
 		task = intent.getStringExtra(SetupActivity.TASK);
+		inputMethod = intent.getStringExtra(SetupActivity.INPUTMETHOD);
+		System.out.println(inputMethod);
 		
 		if (task.equals(SetupActivity.MATCH)) {
 			setContentView(R.layout.activity_main_match);
@@ -60,9 +77,13 @@ public class MainActivity extends Activity {
 			setContentView(R.layout.activity_main_entry);
 			editText = (EditText) findViewById(R.id.enter_path_name);
 		}
+		else if (task.equals(SetupActivity.SELECT)) {
+			setContentView(R.layout.activity_main_match);
+		}
 		else if (task.equals(SetupActivity.AUTHENTICATE)) {
 			setContentView(R.layout.activity_main_authenticate);
 		}
+		
 		memoryView = (MemoryView) findViewById(R.id.memory);
 		if (memoryView.getViewTreeObserver().isAlive()) {
 		    memoryView.getViewTreeObserver().addOnGlobalLayoutListener( 
@@ -77,24 +98,39 @@ public class MainActivity extends Activity {
 		    	        }
 		    	});
 		}
-		 
+		
 		memoryView.setMode(mode);
 		memoryView.setTask(task);
 		
+		minimapViewFlipper = (ViewFlipper) findViewById(R.id.minimapViewFlipper);
+		minimapScroll = (HorizontalScrollView) findViewById(R.id.minimapScroll);
+		//minimapViewFlipper.showNext();
+		minimap = (LinearLayout) findViewById(R.id.minimap);
+		statusText = (TextView) findViewById(R.id.statusText);
+		
 		String fileName = "";
 		if (mode.equals(StartActivity.IMPOSSIBLE)) {
-			fileName = SetupActivity.IMPOSSIBLEFILE;
+			fileName = ListActivity.IMPOSSIBLEFILE;
 		}
 		else if (mode.equals(StartActivity.NONIMPOSSIBLE)) {
-			fileName = SetupActivity.NONIMPOSSIBLEFILE;
+			fileName = ListActivity.NONIMPOSSIBLEFILE;
 		}
 		sharedPreferences = this.getSharedPreferences(fileName, Context.MODE_PRIVATE);
 		editor = sharedPreferences.edit();
 		gson = new Gson();
 		
-		if (task.equals(SetupActivity.MATCH) || task.equals(SetupActivity.AUTHENTICATE)) {
-			String pathName = intent.getStringExtra(SetupActivity.PATHNAME);
+		pathName = "";
+		if (task.equals(SetupActivity.MATCH) || 
+			task.equals(SetupActivity.AUTHENTICATE) ||
+			task.equals(SetupActivity.SELECT)) {
+			pathName = intent.getStringExtra(ListActivity.PATHNAME);
 			memoryView.setRoomManager(sharedPreferences.getString(pathName, ""));
+		}
+		
+		if (task.equals(SetupActivity.SELECT)) {
+			authenticatorSharedPreferences = this.getSharedPreferences(
+					ListActivity.AUTHENTICATORFILE, Context.MODE_PRIVATE);
+			authenticatorEditor = authenticatorSharedPreferences.edit();
 		}
 		
 		inTransition = false;
@@ -131,8 +167,17 @@ public class MainActivity extends Activity {
 		if (!inTransition) {
 			boolean result = memoryView.matchPath();
 			
-			 if (result && task.equals(SetupActivity.AUTHENTICATE)) {
-				exit(view);
+			if (result) {
+				if (task.equals(SetupActivity.AUTHENTICATE)) {
+					exit(view);
+				}
+				if (task.equals(SetupActivity.SELECT)) {
+					authenticatorEditor.putString(ListActivity.AUTHENTICATORNAME, pathName);
+					authenticatorEditor.putString(ListActivity.AUTHENTICATORMODE, mode);
+					authenticatorEditor.putString(ListActivity.AUTHENTICATORINPUTMETHOD, inputMethod);
+					authenticatorEditor.commit();
+					finish();
+				}
 			}
 		}
 	}
@@ -147,13 +192,13 @@ public class MainActivity extends Activity {
 				editor.putString(pathName, roomInfo);
 				
 				List<String> pathList = new ArrayList<String>();
-				if (sharedPreferences.contains(SetupActivity.PATHLIST)) {
-					String json = sharedPreferences.getString(SetupActivity.PATHLIST, "");
+				if (sharedPreferences.contains(ListActivity.PATHLIST)) {
+					String json = sharedPreferences.getString(ListActivity.PATHLIST, "");
 					Type type = new TypeToken<List<String>>(){}.getType();
 					pathList = gson.fromJson(json, type);
 				}
 				pathList.add(pathName);
-				editor.putString(SetupActivity.PATHLIST, gson.toJson(pathList));
+				editor.putString(ListActivity.PATHLIST, gson.toJson(pathList));
 				editor.commit();
 				this.finish();
 			}
@@ -171,50 +216,82 @@ public class MainActivity extends Activity {
 		super.onDestroy();
 	}
 	
+	public void processTouchEventSlow(MotionEvent event) {
+		int x = (int)event.getX();
+	    int y = (int)event.getY();
+
+        switch (event.getAction()) {
+        	case MotionEvent.ACTION_DOWN:
+                inSwipe = true;
+                swipeStart[0] = x;
+                swipeStart[1] = y;
+                break;
+        	case MotionEvent.ACTION_MOVE:
+                break;
+        	case MotionEvent.ACTION_UP:
+        		if (inSwipe) {
+	            	int deltaX = x - swipeStart[0];
+	            	int deltaY = y - swipeStart[1];
+	            	
+	            	if (Math.abs(deltaX) <= 100 &&
+	            		Math.abs(deltaY) <= 100) {
+	            		memoryView.tryMoveSlow(swipeStart[0], swipeStart[1] - minimap.getHeight());
+	            	}
+        		}
+        		
+            	inSwipe = false;
+                break;
+            default:
+            	inSwipe = false;
+                break;
+        }
+	}
+	
+	public void processTouchEventFast(MotionEvent event) {
+		int x = (int)event.getX();
+	    int y = (int)event.getY();
+
+        switch (event.getAction()) {
+        	case MotionEvent.ACTION_DOWN:
+                inSwipe = true;
+                swipeStart[0] = x;
+                swipeStart[1] = y;
+                break;
+        	case MotionEvent.ACTION_MOVE:
+        		if (inSwipe) {
+	            	int deltaX = x - swipeStart[0];
+	            	int deltaY = y - swipeStart[1];
+	            	
+	            	if (Math.abs(deltaX) >= SWIPELENGTH ||
+	            		Math.abs(deltaY) >= SWIPELENGTH) {
+	            		if (deltaX <= -SWIPELENGTH)
+	            			memoryView.tryMoveFast(LEFT);
+	            		else if (deltaY <= -SWIPELENGTH)
+	            			memoryView.tryMoveFast(UP);
+	            		else if (deltaX >= SWIPELENGTH)
+	            			memoryView.tryMoveFast(RIGHT);
+	            		else if (deltaY >= SWIPELENGTH)
+	            			memoryView.tryMoveFast(DOWN);
+	            		
+	            		memoryView.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY,
+	            										 HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING);
+	            		
+	            		swipeStart[0] = x;
+	            		swipeStart[1] = y;
+	            	}
+        		}
+                break;
+        	case MotionEvent.ACTION_UP:
+            	inSwipe = false;
+                break;
+            default:
+            	inSwipe = false;
+                break;
+        }
+	}
+	
 	public boolean onTouchEvent(MotionEvent event) {
 		// Method to get motion with swipes instead of presses
-		/*if (!inTransition) {
-			int x = (int)event.getX();
-		    int y = (int)event.getY();
-	
-	        switch (event.getAction()) {
-	        	case MotionEvent.ACTION_DOWN:
-	                inSwipe = true;
-	                swipeStart[0] = x;
-	                swipeStart[1] = y;
-	                break;
-	        	case MotionEvent.ACTION_MOVE:
-	                break;
-	        	case MotionEvent.ACTION_UP:
-	        		if (inSwipe) {
-		            	int deltaX = x - swipeStart[0];
-		            	int deltaY = y - swipeStart[1];
-		            	
-		            	if (Math.abs(deltaX) >= Math.abs(deltaY)) {
-		            		if (deltaX < 0) {
-		            			memoryView.moveRoom(LEFT);
-		            		}
-		            		else {
-		            			memoryView.moveRoom(RIGHT);
-		            		}
-		            	}
-		            	else {
-		            		if (deltaY < 0) {
-		            			memoryView.moveRoom(UP);
-		            		}
-		            		else {
-		            			memoryView.moveRoom(DOWN);
-		            		}
-		            	}
-	        		}
-	        		
-	            	inSwipe = false;
-	                break;
-	            default:
-	            	inSwipe = false;
-	                break;
-	        }
-		}*/
 		
 		if (task.equals(SetupActivity.ENTRY) && editText.isFocused()) {
 			editText.clearFocus();
@@ -223,34 +300,12 @@ public class MainActivity extends Activity {
 		}
 		
 		if (!inTransition) {
-			int x = (int)event.getX();
-		    int y = (int)event.getY();
-	
-	        switch (event.getAction()) {
-	        	case MotionEvent.ACTION_DOWN:
-	                inSwipe = true;
-	                swipeStart[0] = x;
-	                swipeStart[1] = y;
-	                break;
-	        	case MotionEvent.ACTION_MOVE:
-	                break;
-	        	case MotionEvent.ACTION_UP:
-	        		if (inSwipe) {
-		            	int deltaX = x - swipeStart[0];
-		            	int deltaY = y - swipeStart[1];
-		            	
-		            	if (Math.abs(deltaX) <= 100 &&
-		            		Math.abs(deltaY) <= 100) {
-		            		memoryView.moveRoom(swipeStart[0], swipeStart[1]);
-		            	}
-	        		}
-	        		
-	            	inSwipe = false;
-	                break;
-	            default:
-	            	inSwipe = false;
-	                break;
-	        }
+			if (inputMethod.equals(SetupActivity.SLOW)) {
+				processTouchEventSlow(event);
+			}
+			else if (inputMethod.equals(SetupActivity.FAST)) {
+				processTouchEventFast(event);
+			}
 		}
 
         return super.onTouchEvent(event);

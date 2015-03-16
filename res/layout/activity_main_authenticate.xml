@@ -6,6 +6,34 @@
     android:orientation="vertical"
     tools:context="com.example.memorymockup.MainActivity" >
 
+    <ViewFlipper
+        android:id="@+id/minimapViewFlipper"
+        android:layout_width="match_parent"
+        android:layout_height="50dp" >
+        <HorizontalScrollView
+		    android:id="@+id/minimapScroll"
+		    android:layout_width="wrap_content"
+		    android:layout_height="match_parent"
+		    android:layout_gravity="left"
+		    android:scrollbars="none" >
+			<LinearLayout
+		        android:id="@+id/minimap"
+		        android:layout_width="wrap_content"
+		        android:layout_height="match_parent"
+		        android:layout_marginTop="10dp"
+		        android:orientation="horizontal">
+		    </LinearLayout>
+		</HorizontalScrollView>
+	    <TextView
+	        android:id="@+id/statusText"
+	        android:layout_width="match_parent"
+	        android:layout_height="match_parent"
+	        android:gravity="center"
+	        android:text=""
+	        android:textSize="30sp" >
+	    </TextView>
+    </ViewFlipper>
+    
     <FrameLayout android:orientation="vertical"
         android:layout_width="fill_parent" 
         android:layout_height="0dip" 

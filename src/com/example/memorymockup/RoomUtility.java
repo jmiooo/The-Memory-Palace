@@ -208,13 +208,23 @@ public class RoomUtility {
 			return this.nextColorIndex;
 		}
 		
-		public void processMove(int i) {
+		public void processMove(int doorIndex) {
 		}
 		
-		public void preProcessMove(int i) {
-			preProcessed = true;
-			nextType = randomGenerator.nextInt(TYPES.length);
-			nextColorIndex = randomGenerator.nextInt(COLORS.length);
+		public void preProcessMove(int doorIndex) {
+			Door door = currentRoom.getDoors().get(doorIndex);
+			int destination = door.getDestination();
+			
+			if (destination >= 0) {
+				Room nextRoom = rooms.get(destination);
+				nextType = nextRoom.getType();
+				nextColorIndex = nextRoom.getColorIndex();
+			}
+			else {
+				preProcessed = true;
+				nextType = randomGenerator.nextInt(TYPES.length);
+				nextColorIndex = randomGenerator.nextInt(COLORS.length);
+			}
 		}
 	}
 	

@@ -54,13 +54,13 @@ public class DrawUtility {
 					position = new double[] {position[0] - width, position[1]};
 					break;
 				case 1:
-					position = new double[] {position[0], position[1] - (height - 200)};
+					position = new double[] {position[0], position[1] - height};
 					break;
 				case 2:
 					position = new double[] {position[0] + width, position[1]};
 					break;
 				case 3:
-					position = new double[] {position[0], position[1] + (height - 200)};
+					position = new double[] {position[0], position[1] + height};
 					break;
 				default:
 					break;

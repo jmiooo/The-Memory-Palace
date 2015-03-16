@@ -4,14 +4,6 @@
               android:layout_height="match_parent"
               android:layout_marginBottom="30dp"
               android:orientation="vertical" >
-              
-	 <ListView
-    	 android:id="@+id/save_list"
-    	 android:layout_width="match_parent"
-    	 android:layout_height="wrap_content"
-    	 android:layout_weight="1"
-    	 android:clickable="true"
-    	 android:listSelector="@drawable/list_selector_flatcolor" />
 	 
      <Button
 	     android:layout_height="wrap_content"

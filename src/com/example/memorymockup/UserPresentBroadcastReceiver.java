@@ -17,15 +17,17 @@ public class UserPresentBroadcastReceiver extends BroadcastReceiver {
          * */
  
         if(intent.getAction().equals(Intent.ACTION_USER_PRESENT)){
-        	sharedPreferences = context.getSharedPreferences(SetupActivity.AUTHENTICATORFILE, Context.MODE_PRIVATE);
-        	String authenticatorName = sharedPreferences.getString(SetupActivity.AUTHENTICATORNAME, "");
-        	String authenticatorMode = sharedPreferences.getString(SetupActivity.AUTHENTICATORMODE, "");
+        	sharedPreferences = context.getSharedPreferences(ListActivity.AUTHENTICATORFILE, Context.MODE_PRIVATE);
+        	String authenticatorName = sharedPreferences.getString(ListActivity.AUTHENTICATORNAME, "");
+        	String authenticatorMode = sharedPreferences.getString(ListActivity.AUTHENTICATORMODE, "");
+        	String authenticatorInputMethod = sharedPreferences.getString(ListActivity.AUTHENTICATORINPUTMETHOD, "");
         	
         	if (!authenticatorName.equals("")) {
 	        	intent = new Intent(context, MainActivity.class);
 	        	intent.putExtra(StartActivity.MODE, authenticatorMode);
 				intent.putExtra(SetupActivity.TASK, SetupActivity.AUTHENTICATE);
-				intent.putExtra(SetupActivity.PATHNAME, authenticatorName);
+				intent.putExtra(ListActivity.PATHNAME, authenticatorName);
+				intent.putExtra(SetupActivity.INPUTMETHOD, authenticatorInputMethod);
 	        	intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 	            context.startActivity(intent);
         	}

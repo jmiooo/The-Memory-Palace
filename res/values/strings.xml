@@ -13,6 +13,10 @@
     <string name="entry">Enter Path</string>
     <string name="delete">Delete Path</string>
     <string name="select">Select Path</string>
+    <string name="title_activity_list">ListActivity</string>
+    <string name="input_method">Input Method</string>
+    <string name="input_method_slow">Slow</string>
+    <string name="input_method_fast">Fast</string>
     <string name="reset">Reset Path</string>
     <string name="enter_path_hint">Enter the name of the path.</string>
     <string name="exit">Exit</string>

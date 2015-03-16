@@ -16,13 +16,14 @@ import android.graphics.ColorFilter;
 import android.graphics.LightingColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Point;
 import android.graphics.drawable.ShapeDrawable;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import com.example.memorymockup.DrawUtility.DoorSprite;
 import com.example.memorymockup.DrawUtility.PlayerSprite;
@@ -198,7 +199,7 @@ public class MemoryView extends View {
 		mainActivity = (MainActivity) context;
 	
 		// Initialize the sprites for the different entities
-		offset = 200;
+		offset = 0;
 		assetManager = context.getAssets();
 		
 		display = mainActivity.getWindowManager().getDefaultDisplay();
@@ -258,36 +259,81 @@ public class MemoryView extends View {
 		camera.applyToCanvas(canvas);
 		
 		Room currentRoom = roomManager.getCurrentRoom();
-		roomSprites[currentRoom.getType()].draw(canvas, roomPaints[currentRoom.getColorIndex()]);
-		
-		if (mainActivity.inTransition) {
-			roomSpritesNext[roomManager.getNextType()].draw(canvas, roomPaints[roomManager.getNextColorIndex()]);
-		}
-		
-		for (int i = 0; i < doorSprites.length; i++) {
-		}
-		
-		playerSprite.draw(canvas);
-	    
-	    if (!mainActivity.inTransition && task == MATCH) {
-	    	canvas.drawText(status, 150, 125, textPaint);
-	    	status = "";
-	    }
-	    if (!mainActivity.inTransition && task == ENTRY) {
-	    	canvas.drawText("Room Number: " + Integer.toString(currentRoom.getNumber()), 150, 125, textPaint);
-	    }
+		RoomSprite currentRoomSprite = roomSprites[currentRoom.getType()];
+		currentRoomSprite.draw(canvas, roomPaints[currentRoom.getColorIndex()]);
 	    
 	    if (mainActivity.inTransition) {
-	    	if ((Math.abs(doorSprites[toProcess].position[0] - playerSprite.position[0]) < 25) &&
-	    		(Math.abs(doorSprites[toProcess].position[1] - playerSprite.position[1]) < 25)) {
+	    	RoomSprite nextRoomSprite = roomSpritesNext[roomManager.getNextType()];
+			nextRoomSprite.draw(canvas, roomPaints[roomManager.getNextColorIndex()]);
+			
+			int status = 0;
+			DoorSprite leaveDoor = doorSprites[toProcess];
+
+			// 0 = In room, 1 = In door, 2 = Finished
+			switch (toProcess) {
+				case 0:
+					if ((playerSprite.position[0] <= leaveDoor.position[0]) &&
+						(playerSprite.position[0] >= nextRoomSprite.position[0] - 
+						(leaveDoor.position[0] - currentRoomSprite.position[0]))) {
+						status = 1;
+					}
+					else if (playerSprite.position[0] <= nextRoomSprite.position[0]) {
+						status = 2;
+					}
+					break;
+				case 1:
+					if ((playerSprite.position[1] <= leaveDoor.position[1]) &&
+						(playerSprite.position[1] >= nextRoomSprite.position[1] - 
+						(leaveDoor.position[1] - currentRoomSprite.position[1]))) {
+						status = 1;
+					}
+					else if (playerSprite.position[1] <= nextRoomSprite.position[1]) {
+						status = 2;
+					}
+					break;
+				case 2:
+					if ((playerSprite.position[0] >= leaveDoor.position[0]) &&
+						(playerSprite.position[0] <= nextRoomSprite.position[0] - 
+						(leaveDoor.position[0] - currentRoomSprite.position[0]))) {
+						status = 1;
+					}
+					else if (playerSprite.position[0] >= nextRoomSprite.position[0]) {
+						status = 2;
+					}
+					break;
+				case 3:
+					if ((playerSprite.position[1] >= leaveDoor.position[1]) &&
+						(playerSprite.position[1] <= nextRoomSprite.position[1] - 
+						(leaveDoor.position[1] - currentRoomSprite.position[1]))) {
+						status = 1;
+					}
+					else if (playerSprite.position[1] >= nextRoomSprite.position[1]) {
+						status = 2;
+					}
+					break;
+				default:
+					break;
+			}
+			
+			if (status == 0) {
+				playerSprite.draw(canvas);
+				handler.postDelayed(runnable, 1000/25);
+			}
+			else if (status == 1) {
+				playerSprite.update();
+				handler.postDelayed(runnable, 1000/25);
+			}
+			else if (status == 2) {
 	    		mainActivity.inTransition = false;
-	    		roomSpritesNext[roomManager.getNextType()].directionTranslate((toProcess + 2) % 4, screenX, screenY);
+	    		playerSprite.draw(canvas);
+	    		
 	    		roomManager.processMove(toProcess);
+	    		nextRoomSprite.directionTranslate((toProcess + 2) % 4, screenX, screenY - offset);
 	    		
 	    		camera.restore();
 	    		camera.save();
 	    		
-	    		int leaveDoorIndex = (toProcess + 2) % 4;
+	    		/*int leaveDoorIndex = (toProcess + 2) % 4;
 	    		playerSprite.position = new double[] {doorSprites[leaveDoorIndex].position[0],
 						  							  doorSprites[leaveDoorIndex].position[1]};
 	    		switch (leaveDoorIndex) {
@@ -305,42 +351,113 @@ public class MemoryView extends View {
 	    				break;
 	    			default:
 	    				break;
-	    		}
+	    		}*/
+	    		
 	    		playerSprite.velocity = new double[] {0.0, 0.0};
+	    		
+	    		playerSprite.position = new double[] {currentRoomSprite.position[0],
+						  							  currentRoomSprite.position[1]};
 	    		invalidate();
 	    	}
-		    else {
-			    handler.postDelayed(runnable, 1000/25);
+	    }
+	    else {
+	    	playerSprite.draw(canvas);
+		    
+		    /*if (task == MATCH) {
+		    	canvas.drawText(status, 150, 125, textPaint);
+		    	status = "";
 		    }
+		    if (task == ENTRY) {
+		    	canvas.drawText("Room Number: " + Integer.toString(currentRoom.getNumber()), 150, 125, textPaint);
+		    }*/
 	    }
 	}
 	
-
-	public void moveRoom(int x, int y) {
+	public void showMinimap() {
+		mainActivity.minimapViewFlipper.setDisplayedChild(0);
+	}
+	
+	public void showStatusText() {
+		mainActivity.minimapViewFlipper.setDisplayedChild(1);
+	}
+	
+	public void updateMinimap() {
+		ImageView arrow = new ImageView(mainActivity);
+		switch(toProcess) {
+			case 0:
+				arrow.setImageResource(R.drawable.arrow_left);
+				break;
+			case 1:
+				arrow.setImageResource(R.drawable.arrow_up);
+				break;
+			case 2:
+				arrow.setImageResource(R.drawable.arrow_right);
+				break;
+			case 3:
+				arrow.setImageResource(R.drawable.arrow_down);
+				break;
+			default:
+				break;
+		}
+		
+		// Hard coded in sizes and margins of images
+		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(80, 80);
+		layoutParams.setMargins(10, 0, 10, 0);
+		arrow.setLayoutParams(layoutParams);
+		
+		mainActivity.minimap.addView(arrow);
+		mainActivity.minimapScroll.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+		    @Override
+		    public void onLayoutChange(View view, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+		        mainActivity.minimapScroll.removeOnLayoutChangeListener(this);
+		        mainActivity.minimapScroll.fullScroll(View.FOCUS_RIGHT);
+		    }
+		});
+		showMinimap();
+	}
+	
+	public void tryMoveSlow(int x, int y) {
 		float[] position = new float[] {x, y};
+		boolean willMove = false;
 		
 		for (int i = 0; i < doorSprites.length; i++) {
 			int[] dimensions = doorSprites[i].spriteDim;
 			
+			// Need to account for the height of the minimap in the y-direction
 			if ((doorSprites[i].position[0] - dimensions[0] <= position[0]) &&
 				(doorSprites[i].position[0] + dimensions[0] >= position[0]) &&
 				(doorSprites[i].position[1] - dimensions[1] <= position[1]) &&
 				(doorSprites[i].position[1] + dimensions[1] >= position[1])) {
-				double[] accelerationVector = new double[] {doorSprites[i].position[0] - playerSprite.position[0],
-															doorSprites[i].position[1] - playerSprite.position[1]};
-				double acceleration = Math.sqrt(Math.pow(accelerationVector[0], 2) + Math.pow(accelerationVector[1], 2));
-				accelerationVector[0] = accelerationVector[0] / acceleration;
-				accelerationVector[1] = accelerationVector[1] / acceleration;
-				playerSprite.accelerationVector = accelerationVector;
 				toProcess = i;
-				Log.e("e", String.valueOf(toProcess));
-				roomManager.preProcessMove(toProcess);
-				
-				roomSpritesNext[roomManager.getNextType()].directionTranslate(toProcess, screenX, screenY);
-				
-				mainActivity.inTransition = true;
+				willMove = true;
 			}
 		}
+		
+		if (willMove) {
+			updateMinimap();
+			roomManager.preProcessMove(toProcess);
+			
+			RoomSprite roomSpriteNext = roomSpritesNext[roomManager.getNextType()];
+			roomSpriteNext.directionTranslate(toProcess, screenX, screenY - offset);
+			
+			double[] accelerationVector = new double[] {
+					roomSpriteNext.position[0] - playerSprite.position[0],
+					roomSpriteNext.position[1] - playerSprite.position[1]};
+			double acceleration = Math.sqrt(Math.pow(accelerationVector[0], 2) + Math.pow(accelerationVector[1], 2));
+			accelerationVector[0] = accelerationVector[0] / acceleration;
+			accelerationVector[1] = accelerationVector[1] / acceleration;
+			playerSprite.accelerationVector = accelerationVector;
+			
+			mainActivity.inTransition = true;
+		}
+		
+		invalidate();
+	}
+	
+	public void tryMoveFast(int direction) {
+		toProcess = direction;
+		updateMinimap();
+		roomManager.processMove(toProcess);
 		
 		invalidate();
 	}
@@ -369,17 +486,23 @@ public class MemoryView extends View {
 			for (int i = 0; i < pathUntilNow.size(); i++) {
 				if (pathUntilNow.get(i) != pathToFollow.get(i)) {
 					status = "Path is incorrect.";
+					mainActivity.statusText.setText(status);
+					showStatusText();
 					invalidate();
 					return false;
 				}
 			}
 			
 			status = "Path is correct.";
+			mainActivity.statusText.setText(status);
+			showStatusText();
 			invalidate();
 			return true;
 		}
 		
 		status = "Path is incorrect.";
+		mainActivity.statusText.setText(status);
+		showStatusText();
 		invalidate();
 		return false;
 	}
@@ -398,6 +521,8 @@ public class MemoryView extends View {
 		playerSprite.position = new double[] {roomSprites[room.getType()].spriteDim[0] / 2, 
 										      roomSprites[room.getType()].spriteDim[1] / 2 + offset};
 		playerSprite.row = 0;
+		mainActivity.minimap.removeAllViews();
+		showMinimap();
 		invalidate();
 		mainActivity.inTransition = false;
 	}
