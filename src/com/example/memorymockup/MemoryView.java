@@ -33,7 +33,6 @@ import com.example.memorymockup.RoomUtility.NonImpossibleRoomManager;
 import com.example.memorymockup.RoomUtility.Room;
 import com.example.memorymockup.RoomUtility.RoomManager;
 import com.google.gson.Gson;
-//import com.example.memorymockup.RoomUtility.SemiEquilateralTriangle;
 
 public class MemoryView extends View {
 	public static final int centerX = 550;
@@ -46,23 +45,21 @@ public class MemoryView extends View {
 	
 	public MainActivity mainActivity;
 	
-	public Paint doorPaint;
-	public Paint doorPaintLast;
-	public ShapeDrawable player;
-	public Paint textPaint;
-	public int adjustX, adjustY;
-	
 	public int offset;
 	public AssetManager assetManager;
 	public Display display;
 	
 	public int screenX;
 	public int screenY;
+	
 	public RoomSprite[] roomSprites;
 	public RoomSprite[] roomSpritesNext;
-	public Paint[] roomPaints;
-	public DoorSprite[] doorSprites;
+	public DoorSprite[] doorSprites;	
 	public PlayerSprite playerSprite;
+	
+	public Paint[] roomPaints;
+	public Paint doorPaintLast;
+	
 	public Camera camera;
 	
 	public Handler handler;
@@ -115,7 +112,7 @@ public class MemoryView extends View {
 		screenX = getWidth();
 		screenY = getHeight();
 		
-		
+		// Initialize room sprites
 		roomSprites = new RoomSprite[RoomUtility.TYPES.length];
 		roomSpritesNext = new RoomSprite[RoomUtility.TYPES.length];
 		for (int i = 0; i < roomSprites.length; i++) {
@@ -133,9 +130,10 @@ public class MemoryView extends View {
 			roomSpritesNext[i].position = new double[] {roomSpritesNext[i].spriteDim[0] / 2, roomSpritesNext[i].spriteDim[1] / 2 + offset};
 		}
 		
+		// Initialize door sprites
 		doorSprites = new DoorSprite[4];
+		Bitmap doorBitmap = readBitmap("door.png");
 		for (int i = 0; i < doorSprites.length; i++) {
-			Bitmap doorBitmap = readBitmap("door.png");
 			Matrix doorMatrix = new Matrix();
 	        doorMatrix.postRotate(90 * (1 - i));
 	        
@@ -165,6 +163,7 @@ public class MemoryView extends View {
 			}
 		}
 		
+		//Initialize player sprite
 		Bitmap playerBitmap = readBitmap("player.png");
 		Matrix playerMatrix = new Matrix();
 		playerMatrix.postScale(2f, 2f);
@@ -172,7 +171,6 @@ public class MemoryView extends View {
 		playerBitmap = Bitmap.createBitmap(playerBitmap, 0, 0, playerBitmap.getWidth(), playerBitmap.getHeight(), playerMatrix, true);
 		playerSprite = new PlayerSprite(playerBitmap, new int[] {3, 4}, this);
 		playerSprite.position = new double[] {roomSprites[0].spriteDim[0] / 2, roomSprites[0].spriteDim[1] / 2 + offset};
-		
 		
 		// Initialize paints
 		roomPaints = new Paint[RoomUtility.COLORS.length];
@@ -186,11 +184,10 @@ public class MemoryView extends View {
 		doorPaintLast = new Paint(); 
 		ColorFilter colorFilter = new LightingColorFilter(0xFFFFFF00, 1);
 		doorPaintLast.setColorFilter(colorFilter);
-		
-		textPaint = new Paint(); 
-	    textPaint.setColor(Color.WHITE); 
-	    textPaint.setTextSize(100);
 	    
+		//Initialize map components
+		//mapPaint = new Paint();
+		
 	    camera = new Camera();
 	    camera.save();
 	}
@@ -209,7 +206,6 @@ public class MemoryView extends View {
 	    runnable = new Runnable() {
 			@Override
 			public void run() {
-				// TODO Auto-generated method stub
 				invalidate();
 			}
 		};
@@ -333,26 +329,6 @@ public class MemoryView extends View {
 	    		camera.restore();
 	    		camera.save();
 	    		
-	    		/*int leaveDoorIndex = (toProcess + 2) % 4;
-	    		playerSprite.position = new double[] {doorSprites[leaveDoorIndex].position[0],
-						  							  doorSprites[leaveDoorIndex].position[1]};
-	    		switch (leaveDoorIndex) {
-	    			case 0:
-	    				playerSprite.position[0] += doorSprites[leaveDoorIndex].spriteDim[0] / 2 + playerSprite.spriteDim[0] / 2;
-	    				break;
-	    			case 1:
-	    				playerSprite.position[1] += doorSprites[leaveDoorIndex].spriteDim[1] / 2 + playerSprite.spriteDim[1] / 2;
-	    				break;
-	    			case 2:
-	    				playerSprite.position[0] -= doorSprites[leaveDoorIndex].spriteDim[0] / 2 + playerSprite.spriteDim[0] / 2;
-	    				break;
-	    			case 3:
-	    				playerSprite.position[1] -= doorSprites[leaveDoorIndex].spriteDim[1] / 2 + playerSprite.spriteDim[1] / 2;
-	    				break;
-	    			default:
-	    				break;
-	    		}*/
-	    		
 	    		playerSprite.velocity = new double[] {0.0, 0.0};
 	    		
 	    		playerSprite.position = new double[] {currentRoomSprite.position[0],
@@ -362,14 +338,10 @@ public class MemoryView extends View {
 	    }
 	    else {
 	    	playerSprite.draw(canvas);
-		    
-		    /*if (task == MATCH) {
-		    	canvas.drawText(status, 150, 125, textPaint);
-		    	status = "";
-		    }
-		    if (task == ENTRY) {
-		    	canvas.drawText("Room Number: " + Integer.toString(currentRoom.getNumber()), 150, 125, textPaint);
-		    }*/
+	    	/*mapPaint.setColor(Color.WHITE);
+	    	canvas.drawRect(screenX - 380, screenY - 380, screenX - 30, screenY - 30, mapPaint);
+	    	mapPaint.setColor(Color.BLACK);
+	    	canvas.drawRect(screenX - 375, screenY - 375, screenX - 35, screenY - 35, mapPaint);*/
 	    }
 	}
 	
@@ -405,7 +377,7 @@ public class MemoryView extends View {
 		layoutParams.setMargins(10, 0, 10, 0);
 		arrow.setLayoutParams(layoutParams);
 		
-		mainActivity.minimap.addView(arrow);
+		//mainActivity.minimap.addView(arrow);
 		mainActivity.minimapScroll.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
 		    @Override
 		    public void onLayoutChange(View view, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
@@ -434,7 +406,8 @@ public class MemoryView extends View {
 		}
 		
 		if (willMove) {
-			updateMinimap();
+			//updateMinimap();
+			mainActivity.mapView.drawMap(toProcess);
 			roomManager.preProcessMove(toProcess);
 			
 			RoomSprite roomSpriteNext = roomSpritesNext[roomManager.getNextType()];
@@ -456,7 +429,8 @@ public class MemoryView extends View {
 	
 	public void tryMoveFast(int direction) {
 		toProcess = direction;
-		updateMinimap();
+		//updateMinimap();
+		mainActivity.mapView.drawMap(toProcess);
 		roomManager.processMove(toProcess);
 		
 		invalidate();
@@ -523,6 +497,7 @@ public class MemoryView extends View {
 		playerSprite.row = 0;
 		mainActivity.minimap.removeAllViews();
 		showMinimap();
+		mainActivity.mapView.resetMap();
 		invalidate();
 		mainActivity.inTransition = false;
 	}

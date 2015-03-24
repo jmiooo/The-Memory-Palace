@@ -44,6 +44,7 @@ public class MainActivity extends Activity {
 	public String inputMethod;
 	
 	public MemoryView memoryView;
+	public MapView mapView;
 	public ViewFlipper minimapViewFlipper;
 	public HorizontalScrollView minimapScroll;
 	public LinearLayout minimap;
@@ -95,6 +96,21 @@ public class MainActivity extends Activity {
 		    	        		memoryView.getViewTreeObserver().removeOnGlobalLayoutListener( this );
 		    	        	}
 		    	            memoryView.initDrawables();
+		    	        }
+		    	});
+		}
+		
+		mapView = (MapView) findViewById(R.id.map);
+		if (mapView.getViewTreeObserver().isAlive()) {
+		    mapView.getViewTreeObserver().addOnGlobalLayoutListener( 
+		    	    new OnGlobalLayoutListener(){
+		    	        @Override
+		    	        public void onGlobalLayout() {
+		    	            // gets called after layout has been done
+		    	        	if (mapView.getViewTreeObserver().isAlive()) {
+		    	        		mapView.getViewTreeObserver().removeOnGlobalLayoutListener( this );
+		    	        	}
+		    	            mapView.initDrawables();
 		    	        }
 		    	});
 		}
@@ -304,6 +320,8 @@ public class MainActivity extends Activity {
 				processTouchEventSlow(event);
 			}
 			else if (inputMethod.equals(SetupActivity.FAST)) {
+				// Fast is actually both fast and slow
+				processTouchEventSlow(event);
 				processTouchEventFast(event);
 			}
 		}

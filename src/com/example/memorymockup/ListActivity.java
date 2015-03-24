@@ -43,6 +43,8 @@ public class ListActivity extends Activity {
 	public SharedPreferences sharedPreferences;
 	public Editor editor;
 	public SharedPreferences authenticatorSharedPreferences;
+	public String authenticatorName;
+	public String authenticatorMode;
 	public Editor authenticatorEditor;
 	public Gson gson;
 	
@@ -97,9 +99,13 @@ public class ListActivity extends Activity {
 
 		sharedPreferences = this.getSharedPreferences(fileName, Context.MODE_PRIVATE);
 		editor = sharedPreferences.edit();
+		
 		authenticatorSharedPreferences = this.getSharedPreferences(AUTHENTICATORFILE, Context.MODE_PRIVATE);
 		authenticatorEditor = authenticatorSharedPreferences.edit();
-		gson = new Gson();
+		authenticatorName = authenticatorSharedPreferences.getString(ListActivity.AUTHENTICATORNAME, "");
+    	authenticatorMode = authenticatorSharedPreferences.getString(ListActivity.AUTHENTICATORMODE, "");
+		
+    	gson = new Gson();
 		
 		List<String> pathList = new ArrayList<String>();
 		if (sharedPreferences.contains(PATHLIST)) {
@@ -178,6 +184,14 @@ public class ListActivity extends Activity {
 			editor.putString(PATHLIST, gson.toJson(pathList));
 			editor.remove(pathName);
 			editor.commit();
+        	
+        	if (pathName.equals(authenticatorName) && mode.equals(authenticatorMode)) {
+        		authenticatorEditor.putString(AUTHENTICATORNAME, "");
+        		authenticatorEditor.putString(AUTHENTICATORMODE, "");
+        		authenticatorEditor.putString(AUTHENTICATORINPUTMETHOD, "");
+        		authenticatorEditor.commit();
+        	}
+        	
 			onStart();
 		}
 	}
