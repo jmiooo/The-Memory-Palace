@@ -33,6 +33,7 @@ public class ListActivity extends Activity {
 	public static String PATHLIST = "path_list";
 	
 	public Intent intent;
+	public String username;
 	public String mode;
 	public String task;
 	public String inputMethod;
@@ -74,6 +75,7 @@ public class ListActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		
 		intent = getIntent();
+		username = intent.getStringExtra(IDActivity.ID);
 		mode = intent.getStringExtra(StartActivity.MODE);
 		task = intent.getStringExtra(SetupActivity.TASK);
 		inputMethod = SetupActivity.SLOW;
@@ -91,16 +93,16 @@ public class ListActivity extends Activity {
 		
 		String fileName = "";
 		if (mode.equals(StartActivity.IMPOSSIBLE)) {
-			fileName = IMPOSSIBLEFILE;
+			fileName = username + "_" + IMPOSSIBLEFILE;
 		}
 		else if (mode.equals(StartActivity.NONIMPOSSIBLE)) {
-			fileName = NONIMPOSSIBLEFILE;
+			fileName = username + "_" + NONIMPOSSIBLEFILE;
 		}
 
 		sharedPreferences = this.getSharedPreferences(fileName, Context.MODE_PRIVATE);
 		editor = sharedPreferences.edit();
 		
-		authenticatorSharedPreferences = this.getSharedPreferences(AUTHENTICATORFILE, Context.MODE_PRIVATE);
+		authenticatorSharedPreferences = this.getSharedPreferences(username + "_" + AUTHENTICATORFILE, Context.MODE_PRIVATE);
 		authenticatorEditor = authenticatorSharedPreferences.edit();
 		authenticatorName = authenticatorSharedPreferences.getString(ListActivity.AUTHENTICATORNAME, "");
     	authenticatorMode = authenticatorSharedPreferences.getString(ListActivity.AUTHENTICATORMODE, "");
@@ -128,15 +130,13 @@ public class ListActivity extends Activity {
 	    		if (task.equals(SetupActivity.MATCH)) {
 	    			startMatch(view);
 	    		}
-	    		else if (task.equals(SetupActivity.ENTRY)) {
-	    			// Should not get here
-	    			startEntry(view);
-	    		}
 	    		else if (task.equals(SetupActivity.DELETE)) {
 	    			deletePath(view);
 	    		}
 	    		else if (task.equals(SetupActivity.SELECT)) {
 	    			selectPath(view);
+	    		}
+	    		else {
 	    		}
 	    	}
 	    });
@@ -158,6 +158,7 @@ public class ListActivity extends Activity {
 	public void startMatch(View view) {
 		if (pathIndex >= 0) {
 			intent = new Intent(this, MainActivity.class);
+			intent.putExtra(IDActivity.ID, username);
 			intent.putExtra(StartActivity.MODE, mode);
 			intent.putExtra(SetupActivity.TASK, SetupActivity.MATCH);
 			intent.putExtra(PATHNAME, listAdapter.getDataAtPosition(pathIndex));
@@ -170,6 +171,7 @@ public class ListActivity extends Activity {
 	
 	public void startEntry(View view) {
 		intent = new Intent(this, MainActivity.class);
+		intent.putExtra(IDActivity.ID, username);
 		intent.putExtra(StartActivity.MODE, mode);
 		intent.putExtra(SetupActivity.TASK, SetupActivity.ENTRY);
 		intent.putExtra(SetupActivity.INPUTMETHOD, SetupActivity.SLOW);
@@ -200,6 +202,7 @@ public class ListActivity extends Activity {
 	public void selectPath(View view) {
 		if (pathIndex >= 0) {
 			intent = new Intent(this, MainActivity.class);
+			intent.putExtra(IDActivity.ID, username);
 			intent.putExtra(StartActivity.MODE, mode);
 			intent.putExtra(SetupActivity.TASK, SetupActivity.SELECT);
 			intent.putExtra(PATHNAME, listAdapter.getDataAtPosition(pathIndex));

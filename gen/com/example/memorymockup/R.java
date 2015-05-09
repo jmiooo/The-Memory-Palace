@@ -269,6 +269,25 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
          */
         public static final int buttonBarStyle=0x7f01002e;
+        /** <p>Must be a color value, in the form of "<code>#<i>rgb</i></code>", "<code>#<i>argb</i></code>",
+"<code>#<i>rrggbb</i></code>", or "<code>#<i>aarrggbb</i></code>".
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+         */
+        public static final int cb_color=0x7f0100a9;
+        /** <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
+Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
+in (inches), mm (millimeters).
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+         */
+        public static final int cb_pressedRingWidth=0x7f0100aa;
         /**  Close button icon 
          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
@@ -1644,11 +1663,14 @@ containing a value of this type.
         public static final int arrow_up=0x7f020039;
         public static final int arrow_up_big=0x7f02003a;
         public static final int background=0x7f02003b;
-        public static final int door=0x7f02003c;
-        public static final int ic_launcher=0x7f02003d;
-        public static final int input_method_switch=0x7f02003e;
-        public static final int list_selector_flatcolor=0x7f02003f;
-        public static final int player=0x7f020040;
+        public static final int c=0x7f02003c;
+        public static final int door=0x7f02003d;
+        public static final int e=0x7f02003e;
+        public static final int ic_launcher=0x7f02003f;
+        public static final int input_method_switch=0x7f020040;
+        public static final int list_selector_flatcolor=0x7f020041;
+        public static final int player=0x7f020042;
+        public static final int r=0x7f020043;
     }
     public static final class id {
         public static final int action_bar=0x7f090031;
@@ -1664,7 +1686,7 @@ containing a value of this type.
         public static final int action_mode_bar=0x7f09002e;
         public static final int action_mode_bar_stub=0x7f09002d;
         public static final int action_mode_close_button=0x7f090020;
-        public static final int action_settings=0x7f090049;
+        public static final int action_settings=0x7f09004b;
         public static final int activity_chooser_view_content=0x7f090021;
         public static final int always=0x7f090014;
         public static final int beginning=0x7f09001b;
@@ -1677,7 +1699,8 @@ containing a value of this type.
         public static final int dropdown=0x7f09001a;
         public static final int edit_query=0x7f090033;
         public static final int end=0x7f09001c;
-        public static final int enter_path_name=0x7f090047;
+        public static final int enter_id=0x7f09003f;
+        public static final int enter_path_name=0x7f090049;
         public static final int expand_activities_button=0x7f090022;
         public static final int expanded_menu=0x7f090028;
         public static final int home=0x7f090000;
@@ -1687,20 +1710,21 @@ containing a value of this type.
         public static final int image=0x7f090023;
         public static final int listMode=0x7f09000a;
         public static final int list_item=0x7f090025;
-        public static final int map=0x7f090046;
-        public static final int memory=0x7f090045;
-        public static final int memoryFrame=0x7f090044;
+        public static final int map=0x7f090048;
+        public static final int memory=0x7f090047;
+        public static final int memoryFrame=0x7f090046;
         public static final int middle=0x7f09001d;
-        public static final int minimap=0x7f090042;
-        public static final int minimapScroll=0x7f090041;
-        public static final int minimapViewFlipper=0x7f090040;
+        public static final int minimap=0x7f090043;
+        public static final int minimapScroll=0x7f090042;
+        public static final int minimapViewFlipper=0x7f090041;
         public static final int never=0x7f090017;
         public static final int none=0x7f09000f;
         public static final int normal=0x7f09000b;
         public static final int progress_circular=0x7f090007;
         public static final int progress_horizontal=0x7f090008;
+        public static final int promptText=0x7f090045;
         public static final int radio=0x7f09002b;
-        public static final int save_list=0x7f09003f;
+        public static final int save_list=0x7f090040;
         public static final int search_badge=0x7f090035;
         public static final int search_bar=0x7f090034;
         public static final int search_button=0x7f090036;
@@ -1711,13 +1735,13 @@ containing a value of this type.
         public static final int search_plate=0x7f090039;
         public static final int search_src_text=0x7f09003a;
         public static final int search_voice_btn=0x7f09003e;
-        public static final int setup_row=0x7f090048;
+        public static final int setup_row=0x7f09004a;
         public static final int shortcut=0x7f09002a;
         public static final int showCustom=0x7f090010;
         public static final int showHome=0x7f090011;
         public static final int showTitle=0x7f090012;
         public static final int split_action_bar=0x7f090004;
-        public static final int statusText=0x7f090043;
+        public static final int statusText=0x7f090044;
         public static final int submit_area=0x7f09003c;
         public static final int tabMode=0x7f09000c;
         public static final int title=0x7f090027;
@@ -1775,15 +1799,18 @@ containing a value of this type.
         public static final int abc_search_dropdown_item_icons_2line=0x7f030014;
         public static final int abc_search_view=0x7f030015;
         public static final int abc_simple_dropdown_hint=0x7f030016;
-        public static final int activity_list=0x7f030017;
-        public static final int activity_list_delete=0x7f030018;
-        public static final int activity_main_authenticate=0x7f030019;
-        public static final int activity_main_entry=0x7f03001a;
-        public static final int activity_main_match=0x7f03001b;
-        public static final int activity_setup=0x7f03001c;
-        public static final int activity_start=0x7f03001d;
-        public static final int setup_row=0x7f03001e;
-        public static final int support_simple_spinner_dropdown_item=0x7f03001f;
+        public static final int activity_id=0x7f030017;
+        public static final int activity_list=0x7f030018;
+        public static final int activity_list_delete=0x7f030019;
+        public static final int activity_main_authenticate=0x7f03001a;
+        public static final int activity_main_entry=0x7f03001b;
+        public static final int activity_main_match=0x7f03001c;
+        public static final int activity_main_prompt=0x7f03001d;
+        public static final int activity_main_random=0x7f03001e;
+        public static final int activity_setup=0x7f03001f;
+        public static final int activity_start=0x7f030020;
+        public static final int setup_row=0x7f030021;
+        public static final int support_simple_spinner_dropdown_item=0x7f030022;
     }
     public static final class menu {
         public static final int main=0x7f0c0000;
@@ -1849,23 +1876,29 @@ containing a value of this type.
         public static final int abc_toolbar_collapse_description=0x7f0a0004;
         public static final int action_settings=0x7f0a0012;
         public static final int app_name=0x7f0a0010;
-        public static final int delete=0x7f0a001a;
-        public static final int enter_path_hint=0x7f0a0021;
-        public static final int entry=0x7f0a0019;
-        public static final int exit=0x7f0a0022;
+        public static final int delete=0x7f0a001e;
+        public static final int enter_id_hint=0x7f0a0015;
+        public static final int enter_path_hint=0x7f0a0027;
+        public static final int entry=0x7f0a001d;
+        public static final int exit=0x7f0a0028;
         public static final int hello_world=0x7f0a0011;
-        public static final int impossible=0x7f0a0015;
-        public static final int input_method=0x7f0a001d;
-        public static final int input_method_fast=0x7f0a001f;
-        public static final int input_method_slow=0x7f0a001e;
-        public static final int match=0x7f0a0018;
-        public static final int non_impossible=0x7f0a0016;
-        public static final int reset=0x7f0a0020;
-        public static final int select=0x7f0a001b;
-        public static final int title=0x7f0a0014;
-        public static final int title_activity_list=0x7f0a001c;
-        public static final int title_activity_setup=0x7f0a0017;
-        public static final int title_activity_start=0x7f0a0013;
+        public static final int id_instructions=0x7f0a0014;
+        public static final int impossible=0x7f0a0019;
+        public static final int input_method=0x7f0a0023;
+        public static final int input_method_fast=0x7f0a0025;
+        public static final int input_method_slow=0x7f0a0024;
+        public static final int match=0x7f0a001c;
+        public static final int non_impossible=0x7f0a001a;
+        public static final int prompt=0x7f0a0021;
+        public static final int random=0x7f0a0020;
+        public static final int reset=0x7f0a0026;
+        public static final int select=0x7f0a001f;
+        public static final int start=0x7f0a0016;
+        public static final int title=0x7f0a0018;
+        public static final int title_activity_id=0x7f0a0013;
+        public static final int title_activity_list=0x7f0a0022;
+        public static final int title_activity_setup=0x7f0a001b;
+        public static final int title_activity_start=0x7f0a0017;
     }
     public static final class style {
         /** 
@@ -2901,6 +2934,52 @@ containing a value of this type.
           @attr name com.example.memorymockup:initialActivityCount
         */
         public static final int ActivityChooserView_initialActivityCount = 0;
+        /** Attributes that can be used with a CircleButton.
+           <p>Includes the following attributes:</p>
+           <table>
+           <colgroup align="left" />
+           <colgroup align="left" />
+           <tr><th>Attribute</th><th>Description</th></tr>
+           <tr><td><code>{@link #CircleButton_cb_color com.example.memorymockup:cb_color}</code></td><td></td></tr>
+           <tr><td><code>{@link #CircleButton_cb_pressedRingWidth com.example.memorymockup:cb_pressedRingWidth}</code></td><td></td></tr>
+           </table>
+           @see #CircleButton_cb_color
+           @see #CircleButton_cb_pressedRingWidth
+         */
+        public static final int[] CircleButton = {
+            0x7f0100a9, 0x7f0100aa
+        };
+        /**
+          <p>This symbol is the offset where the {@link com.example.memorymockup.R.attr#cb_color}
+          attribute's value can be found in the {@link #CircleButton} array.
+
+
+          <p>Must be a color value, in the form of "<code>#<i>rgb</i></code>", "<code>#<i>argb</i></code>",
+"<code>#<i>rrggbb</i></code>", or "<code>#<i>aarrggbb</i></code>".
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          @attr name com.example.memorymockup:cb_color
+        */
+        public static final int CircleButton_cb_color = 0;
+        /**
+          <p>This symbol is the offset where the {@link com.example.memorymockup.R.attr#cb_pressedRingWidth}
+          attribute's value can be found in the {@link #CircleButton} array.
+
+
+          <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
+Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
+in (inches), mm (millimeters).
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          @attr name com.example.memorymockup:cb_pressedRingWidth
+        */
+        public static final int CircleButton_cb_pressedRingWidth = 1;
         /** Attributes that can be used with a CompatTextView.
            <p>Includes the following attributes:</p>
            <table>

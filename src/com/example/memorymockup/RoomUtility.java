@@ -149,6 +149,7 @@ public class RoomUtility {
 		protected boolean preProcessed = false;
 		protected int nextType;
 		protected int nextColorIndex;
+		protected String[] prompts;
 		
 		protected Random randomGenerator;
 		
@@ -166,6 +167,8 @@ public class RoomUtility {
 			path.add(0);
 			
 			lastDoorIndex = -1;
+			
+			prompts = new String[] {};
 		}
 		
 		public Room getCurrentRoom() {
@@ -206,6 +209,14 @@ public class RoomUtility {
 		
 		public int getNextColorIndex() {
 			return this.nextColorIndex;
+		}
+		
+		public void setPrompts(String[] prompts) {
+			this.prompts = prompts;
+		}
+		
+		public String[] getPrompts() {
+			return this.prompts;
 		}
 		
 		public void processMove(int doorIndex) {

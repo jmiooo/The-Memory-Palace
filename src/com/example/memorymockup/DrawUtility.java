@@ -20,7 +20,7 @@ public class DrawUtility {
 			this.bitmap = bitmap;
 			this.arrayDim = arrayDim;
 			this.spriteDim = new int[] { bitmap.getWidth() / arrayDim[0],
-									     bitmap.getHeight() / arrayDim[1]};
+									     bitmap.getHeight() / arrayDim[1] };
 		}
 		
 		public void draw(Canvas canvas, Paint paint) {
@@ -84,7 +84,7 @@ public class DrawUtility {
 		public double[] velocity = {0.0, 0.0};
 		public double maxSpeed = 10.0;
 		public int walkDuration = 2;
-		public double acceleration = 2.0;
+		public double acceleration = 10.0;
 		public double deceleration = -1.0;
 		public double[] accelerationVector = {0.0, 0.0};
 		public int currentFrame = walkDuration - 1;
@@ -95,6 +95,10 @@ public class DrawUtility {
 		public PlayerSprite(Bitmap bitmap, int[] arrayDim, MemoryView memoryView) {
 			super(bitmap, arrayDim);
 			this.memoryView = memoryView;
+		}
+		
+		public void adjustMaxSpeed(double maxSpeed) {
+			this.maxSpeed = maxSpeed;
 		}
 		
 		public void update() {
@@ -120,6 +124,34 @@ public class DrawUtility {
 					velocity[0] = velocity[0] * maxSpeed / speed;
 					velocity[1] = velocity[1] * maxSpeed / speed;
 				}
+				
+				position[0] += velocity[0];
+				position[1] += velocity[1];
+				currentFrame += 1;
+				
+				if (velocity[0] == 0 && velocity[1] == 0) {
+					col = 1;
+				}
+				else {
+					col = (currentFrame / walkDuration) % arrayDim[0];
+				}
+				
+				if (Math.abs(velocity[0]) > Math.abs(velocity[1])) {
+					if (velocity[0] >= 0)
+						row = 2;
+					else
+						row = 1;
+				}
+				else {
+					if (velocity[1] >= 0)
+						row = 0;
+					else
+						row = 3;
+				}
+			}
+			else if (memoryView.mainActivity.inBlur) {
+				velocity[0] = (double) (accelerationVector[0] * maxSpeed);
+				velocity[1] = (double) (accelerationVector[1] * maxSpeed);
 				
 				position[0] += velocity[0];
 				position[1] += velocity[1];

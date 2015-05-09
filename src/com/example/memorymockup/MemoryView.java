@@ -43,6 +43,9 @@ public class MemoryView extends View {
 	public static final String[] roomFileNames =
 		{"room1.png", "room2.png", "room3.png", "room4.png", "room5.png", "room6.png", "room7.png"};
 	
+	public static final double transitionMaxSpeed = 25.00;
+	public static final double blurMaxSpeed = 50.00;
+	
 	public MainActivity mainActivity;
 	
 	public int offset;
@@ -78,7 +81,12 @@ public class MemoryView extends View {
 	
 	public Gson gson;
 	
-	public int toProcess;
+	public double maxSpeed;
+	
+	// Only correct once at least one move is made
+	// Don't use for purposes other than transitions
+	public int previousMove;
+	public Room previousRoom;
 	
 	// Just for matching
 	public List<Integer> pathToFollow;
@@ -184,9 +192,6 @@ public class MemoryView extends View {
 		doorPaintLast = new Paint(); 
 		ColorFilter colorFilter = new LightingColorFilter(0xFFFFFF00, 1);
 		doorPaintLast.setColorFilter(colorFilter);
-	    
-		//Initialize map components
-		//mapPaint = new Paint();
 		
 	    camera = new Camera();
 	    camera.save();
@@ -213,6 +218,9 @@ public class MemoryView extends View {
 	    mode = IMPOSSIBLE;
 	    
 	    gson = new Gson();
+	    
+	    previousMove = -1;
+		previousRoom = null;
 	}
 	
 	public void setMode(String modeString) {
@@ -237,8 +245,17 @@ public class MemoryView extends View {
 	
 	@Override
 	protected void onDraw(Canvas canvas) {
-		if (mainActivity.inTransition) {
-			switch (toProcess) {
+		if (!mainActivity.inTransition && !mainActivity.inBlur) {
+			camera.applyToCanvas(canvas);
+			
+			Room currentRoom = roomManager.getCurrentRoom();
+			RoomSprite currentRoomSprite = roomSprites[currentRoom.getType()];
+			currentRoomSprite.draw(canvas, roomPaints[currentRoom.getColorIndex()]);
+			
+			playerSprite.draw(canvas);
+		}
+		else {//if (mainActivity.inTransition) {
+			switch (previousMove) {
 				case 0:
 				case 2:
 					camera.translate((float) -playerSprite.velocity[0], 0f, 0f);
@@ -250,30 +267,28 @@ public class MemoryView extends View {
 				default:
 					break;
 			}
-		}
-		
-		camera.applyToCanvas(canvas);
-		
-		Room currentRoom = roomManager.getCurrentRoom();
-		RoomSprite currentRoomSprite = roomSprites[currentRoom.getType()];
-		currentRoomSprite.draw(canvas, roomPaints[currentRoom.getColorIndex()]);
-	    
-	    if (mainActivity.inTransition) {
-	    	RoomSprite nextRoomSprite = roomSpritesNext[roomManager.getNextType()];
-			nextRoomSprite.draw(canvas, roomPaints[roomManager.getNextColorIndex()]);
+			
+			camera.applyToCanvas(canvas);
+			
+			RoomSprite currentRoomSprite = roomSprites[previousRoom.getType()];
+			currentRoomSprite.draw(canvas, roomPaints[previousRoom.getColorIndex()]);
+			
+			Room currentRoom = roomManager.getCurrentRoom();
+			RoomSprite nextRoomSprite = roomSpritesNext[currentRoom.getType()];
+			nextRoomSprite.draw(canvas, roomPaints[currentRoom.getColorIndex()]);
 			
 			int status = 0;
-			DoorSprite leaveDoor = doorSprites[toProcess];
+			DoorSprite leaveDoor = doorSprites[previousMove];
 
 			// 0 = In room, 1 = In door, 2 = Finished
-			switch (toProcess) {
+			switch (previousMove) {
 				case 0:
 					if ((playerSprite.position[0] <= leaveDoor.position[0]) &&
 						(playerSprite.position[0] >= nextRoomSprite.position[0] - 
 						(leaveDoor.position[0] - currentRoomSprite.position[0]))) {
 						status = 1;
 					}
-					else if (playerSprite.position[0] <= nextRoomSprite.position[0]) {
+					else if (playerSprite.position[0] <= nextRoomSprite.position[0] + maxSpeed) {
 						status = 2;
 					}
 					break;
@@ -283,7 +298,7 @@ public class MemoryView extends View {
 						(leaveDoor.position[1] - currentRoomSprite.position[1]))) {
 						status = 1;
 					}
-					else if (playerSprite.position[1] <= nextRoomSprite.position[1]) {
+					else if (playerSprite.position[1] <= nextRoomSprite.position[1] + maxSpeed) {
 						status = 2;
 					}
 					break;
@@ -293,7 +308,7 @@ public class MemoryView extends View {
 						(leaveDoor.position[0] - currentRoomSprite.position[0]))) {
 						status = 1;
 					}
-					else if (playerSprite.position[0] >= nextRoomSprite.position[0]) {
+					else if (playerSprite.position[0] >= nextRoomSprite.position[0] - maxSpeed) {
 						status = 2;
 					}
 					break;
@@ -303,7 +318,7 @@ public class MemoryView extends View {
 						(leaveDoor.position[1] - currentRoomSprite.position[1]))) {
 						status = 1;
 					}
-					else if (playerSprite.position[1] >= nextRoomSprite.position[1]) {
+					else if (playerSprite.position[1] >= nextRoomSprite.position[1] - maxSpeed) {
 						status = 2;
 					}
 					break;
@@ -320,11 +335,12 @@ public class MemoryView extends View {
 				handler.postDelayed(runnable, 1000/25);
 			}
 			else if (status == 2) {
-	    		mainActivity.inTransition = false;
 	    		playerSprite.draw(canvas);
+
+	    		mainActivity.inTransition = false;
+	    		mainActivity.inBlur = false;
 	    		
-	    		roomManager.processMove(toProcess);
-	    		nextRoomSprite.directionTranslate((toProcess + 2) % 4, screenX, screenY - offset);
+	    		nextRoomSprite.directionTranslate((previousMove + 2) % 4, screenX, screenY - offset);
 	    		
 	    		camera.restore();
 	    		camera.save();
@@ -334,15 +350,15 @@ public class MemoryView extends View {
 	    		playerSprite.position = new double[] {currentRoomSprite.position[0],
 						  							  currentRoomSprite.position[1]};
 	    		invalidate();
+	    		
+	    		if (mainActivity.inShow) {
+	    			mainActivity.randomPlayer.showCallback();
+	    		}
 	    	}
-	    }
-	    else {
-	    	playerSprite.draw(canvas);
-	    	/*mapPaint.setColor(Color.WHITE);
-	    	canvas.drawRect(screenX - 380, screenY - 380, screenX - 30, screenY - 30, mapPaint);
-	    	mapPaint.setColor(Color.BLACK);
-	    	canvas.drawRect(screenX - 375, screenY - 375, screenX - 35, screenY - 35, mapPaint);*/
-	    }
+		}
+		/*else if (mainActivity.inBlur) {
+			
+		}*/
 	}
 	
 	public void showMinimap() {
@@ -353,43 +369,38 @@ public class MemoryView extends View {
 		mainActivity.minimapViewFlipper.setDisplayedChild(1);
 	}
 	
-	public void updateMinimap() {
-		ImageView arrow = new ImageView(mainActivity);
-		switch(toProcess) {
-			case 0:
-				arrow.setImageResource(R.drawable.arrow_left);
-				break;
-			case 1:
-				arrow.setImageResource(R.drawable.arrow_up);
-				break;
-			case 2:
-				arrow.setImageResource(R.drawable.arrow_right);
-				break;
-			case 3:
-				arrow.setImageResource(R.drawable.arrow_down);
-				break;
-			default:
-				break;
-		}
+	public void showPromptText() {
+		mainActivity.minimapViewFlipper.setDisplayedChild(2);
+	}
+	
+	public void tryMoveSlow(int direction) {
+		previousMove = direction;
+		previousRoom = roomManager.getCurrentRoom();
+
+		roomManager.processMove(previousMove);
+		mainActivity.mapView.drawMap(previousMove);
 		
-		// Hard coded in sizes and margins of images
-		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(80, 80);
-		layoutParams.setMargins(10, 0, 10, 0);
-		arrow.setLayoutParams(layoutParams);
+		Room currentRoom = roomManager.getCurrentRoom();
+		RoomSprite roomSpriteNext = roomSpritesNext[currentRoom.getType()];
+		roomSpriteNext.directionTranslate(previousMove, screenX, screenY - offset);
 		
-		//mainActivity.minimap.addView(arrow);
-		mainActivity.minimapScroll.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-		    @Override
-		    public void onLayoutChange(View view, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-		        mainActivity.minimapScroll.removeOnLayoutChangeListener(this);
-		        mainActivity.minimapScroll.fullScroll(View.FOCUS_RIGHT);
-		    }
-		});
-		showMinimap();
+		double[] accelerationVector = new double[] {
+				roomSpriteNext.position[0] - playerSprite.position[0],
+				roomSpriteNext.position[1] - playerSprite.position[1]};
+		double acceleration = Math.sqrt(Math.pow(accelerationVector[0], 2) + Math.pow(accelerationVector[1], 2));
+		accelerationVector[0] = accelerationVector[0] / acceleration;
+		accelerationVector[1] = accelerationVector[1] / acceleration;
+		playerSprite.accelerationVector = accelerationVector;
+		maxSpeed = transitionMaxSpeed;
+		playerSprite.adjustMaxSpeed(maxSpeed);
+		
+		mainActivity.inTransition = true;
+		invalidate();
 	}
 	
 	public void tryMoveSlow(int x, int y) {
 		float[] position = new float[] {x, y};
+		int direction = -1;
 		boolean willMove = false;
 		
 		for (int i = 0; i < doorSprites.length; i++) {
@@ -400,38 +411,61 @@ public class MemoryView extends View {
 				(doorSprites[i].position[0] + dimensions[0] >= position[0]) &&
 				(doorSprites[i].position[1] - dimensions[1] <= position[1]) &&
 				(doorSprites[i].position[1] + dimensions[1] >= position[1])) {
-				toProcess = i;
+				direction = i;
 				willMove = true;
 			}
 		}
 		
 		if (willMove) {
-			//updateMinimap();
-			mainActivity.mapView.drawMap(toProcess);
-			roomManager.preProcessMove(toProcess);
-			
-			RoomSprite roomSpriteNext = roomSpritesNext[roomManager.getNextType()];
-			roomSpriteNext.directionTranslate(toProcess, screenX, screenY - offset);
-			
-			double[] accelerationVector = new double[] {
-					roomSpriteNext.position[0] - playerSprite.position[0],
-					roomSpriteNext.position[1] - playerSprite.position[1]};
-			double acceleration = Math.sqrt(Math.pow(accelerationVector[0], 2) + Math.pow(accelerationVector[1], 2));
-			accelerationVector[0] = accelerationVector[0] / acceleration;
-			accelerationVector[1] = accelerationVector[1] / acceleration;
-			playerSprite.accelerationVector = accelerationVector;
-			
-			mainActivity.inTransition = true;
+			tryMoveSlow(direction);
 		}
-		
-		invalidate();
 	}
 	
 	public void tryMoveFast(int direction) {
-		toProcess = direction;
-		//updateMinimap();
-		mainActivity.mapView.drawMap(toProcess);
-		roomManager.processMove(toProcess);
+		// Make this into a function
+		if (mainActivity.inBlur) {
+			handler.removeCallbacks(runnable);
+			
+			mainActivity.inTransition = false;
+    		mainActivity.inBlur = false;
+    		
+    		RoomSprite currentRoomSprite = roomSprites[previousRoom.getType()];
+    		
+    		Room currentRoom = roomManager.getCurrentRoom();
+			RoomSprite nextRoomSprite = roomSpritesNext[currentRoom.getType()];
+			
+    		nextRoomSprite.directionTranslate((previousMove + 2) % 4, screenX, screenY - offset);
+    		
+    		camera.restore();
+    		camera.save();
+    		
+    		playerSprite.velocity = new double[] {0.0, 0.0};
+    		
+    		playerSprite.position = new double[] {currentRoomSprite.position[0],
+					  							  currentRoomSprite.position[1]};
+		}
+		
+		previousMove = direction;
+		previousRoom = roomManager.getCurrentRoom();
+		
+		roomManager.processMove(previousMove);
+		mainActivity.mapView.drawMap(previousMove);
+		
+		Room currentRoom = roomManager.getCurrentRoom();
+		RoomSprite roomSpriteNext = roomSpritesNext[currentRoom.getType()];
+		roomSpriteNext.directionTranslate(previousMove, screenX, screenY - offset);
+		
+		double[] accelerationVector = new double[] {
+				roomSpriteNext.position[0] - playerSprite.position[0],
+				roomSpriteNext.position[1] - playerSprite.position[1]};
+		double acceleration = Math.sqrt(Math.pow(accelerationVector[0], 2) + Math.pow(accelerationVector[1], 2));
+		accelerationVector[0] = accelerationVector[0] / acceleration;
+		accelerationVector[1] = accelerationVector[1] / acceleration;
+		playerSprite.accelerationVector = accelerationVector;
+		maxSpeed = blurMaxSpeed;
+		playerSprite.adjustMaxSpeed(maxSpeed);
+		
+		mainActivity.inBlur = true;
 		
 		invalidate();
 	}
@@ -453,6 +487,10 @@ public class MemoryView extends View {
 		this.roomManager.setLastDoorIndex(-1);
 	}
 	
+	/*public void setPathToFollow(List<Integer> pathToFollow) {
+		this.pathToFollow = pathToFollow;
+	}*/
+	
 	public boolean matchPath() {
 		List<Integer> pathUntilNow = roomManager.getPath();
 		
@@ -462,7 +500,6 @@ public class MemoryView extends View {
 					status = "Path is incorrect.";
 					mainActivity.statusText.setText(status);
 					showStatusText();
-					invalidate();
 					return false;
 				}
 			}
@@ -470,14 +507,12 @@ public class MemoryView extends View {
 			status = "Path is correct.";
 			mainActivity.statusText.setText(status);
 			showStatusText();
-			invalidate();
 			return true;
 		}
 		
 		status = "Path is incorrect.";
 		mainActivity.statusText.setText(status);
 		showStatusText();
-		invalidate();
 		return false;
 	}
 	
@@ -486,6 +521,31 @@ public class MemoryView extends View {
 	}
 	
 	public void resetPath() {
+		if (mainActivity.inBlur) {
+			handler.removeCallbacks(runnable);
+			
+			mainActivity.inTransition = false;
+    		mainActivity.inBlur = false;
+    		
+    		RoomSprite currentRoomSprite = roomSprites[previousRoom.getType()];
+    		
+    		Room currentRoom = roomManager.getCurrentRoom();
+			RoomSprite nextRoomSprite = roomSpritesNext[currentRoom.getType()];
+			
+    		nextRoomSprite.directionTranslate((previousMove + 2) % 4, screenX, screenY - offset);
+    		
+    		camera.restore();
+    		camera.save();
+    		
+    		playerSprite.velocity = new double[] {0.0, 0.0};
+    		
+    		playerSprite.position = new double[] {currentRoomSprite.position[0],
+					  							  currentRoomSprite.position[1]};
+		}
+		
+		previousMove = -1;
+		previousRoom = null;
+		
 		Room room = this.roomManager.getRooms().get(0);
 		this.roomManager.setCurrentRoom(room);
 		List<Integer> newPath = new ArrayList<Integer>();
@@ -495,7 +555,7 @@ public class MemoryView extends View {
 		playerSprite.position = new double[] {roomSprites[room.getType()].spriteDim[0] / 2, 
 										      roomSprites[room.getType()].spriteDim[1] / 2 + offset};
 		playerSprite.row = 0;
-		mainActivity.minimap.removeAllViews();
+		//mainActivity.minimap.removeAllViews();
 		showMinimap();
 		mainActivity.mapView.resetMap();
 		invalidate();

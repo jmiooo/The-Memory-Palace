@@ -13,17 +13,24 @@
         android:layout_height="50dp" >
         <HorizontalScrollView
 		    android:id="@+id/minimapScroll"
-		    android:layout_width="wrap_content"
+		    android:layout_width="match_parent"
 		    android:layout_height="match_parent"
 		    android:layout_gravity="left"
 		    android:scrollbars="none" >
-			<LinearLayout
+			<!-->LinearLayout
 		        android:id="@+id/minimap"
 		        android:layout_width="wrap_content"
 		        android:layout_height="match_parent"
 		        android:layout_marginTop="10dp"
 		        android:orientation="horizontal">
-		    </LinearLayout>
+		    </LinearLayout-->
+		    <EditText
+		        android:id="@+id/enter_path_name"
+			    android:layout_width="300dp"
+			    android:layout_height="wrap_content"
+			    android:layout_gravity="top|center"
+			    android:singleLine="true"
+			    android:hint="@string/enter_path_hint" />
 		</HorizontalScrollView>
 	    <TextView
 	        android:id="@+id/statusText"
@@ -31,7 +38,7 @@
 	        android:layout_height="match_parent"
 	        android:gravity="center"
 	        android:text=""
-	        android:textSize="30sp" >
+	        android:textSize="30sp">
 	    </TextView>
 	    <TextView
 	        android:id="@+id/promptText"
@@ -46,7 +53,6 @@
     <FrameLayout android:orientation="vertical"
         android:layout_width="fill_parent" 
         android:layout_height="0dip" 
-        android:fillViewport="true"
         android:id="@+id/memoryFrame" 
         android:layout_weight="1.0">
 	    <com.example.memorymockup.MemoryView
@@ -74,8 +80,8 @@
 			     android:layout_alignParentLeft="true"
 			     android:layout_marginLeft="10dp"
 			     android:padding="24dip"
-			     android:src="@drawable/c"
-			     android:onClick="matchPath"
+			     android:src="@drawable/e"
+			     android:onClick="enterPath"
 			     android:scaleType="centerInside"
 			     app:cb_color="#006600"
         		 app:cb_pressedRingWidth="8dip" />
@@ -99,7 +105,7 @@
 			     android:layout_marginBottom="10dp"
 			     android:padding="24dip"
 			     android:src="@drawable/c"
-			     android:onClick="showPromptForMatching"
+			     android:onClick="showPromptForEntering"
 			     android:scaleType="centerInside"
 			     app:cb_color="#CCCC00"
         		 app:cb_pressedRingWidth="8dip" />
@@ -110,21 +116,14 @@
 	     android:layout_height="wrap_content"
 	     android:layout_width="300dp"
 	     android:layout_marginBottom="5dp"
-	     android:text="@string/match"
-	     android:onClick="matchPath" />
-    
+	     android:text="@string/entry"
+	     android:onClick="enterPath" />
+
     <Button
 	     android:layout_height="wrap_content"
 	     android:layout_width="300dp"
 	     android:layout_marginBottom="5dp"
 	     android:text="@string/reset"
-	     android:onClick="resetPath" />
+	     android:onClick="resetPath" /-->
     
-    <Button
-	     android:layout_height="wrap_content"
-	     android:layout_width="300dp"
-	     android:layout_marginBottom="5dp"
-	     android:text="@string/exit"
-	     android:onClick="exit" /-->
-
 </LinearLayout>
